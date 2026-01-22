@@ -1,12 +1,26 @@
 <script lang="ts">
+  import { CldUploadWidget } from "svelte-cloudinary";
+  import { env } from "$env/dynamic/public";
+
   interface Props {
     onUpload: (url: string) => void;
   }
 
   let { onUpload }: Props = $props();
   let uploadedUrl = $state<string | null>(null);
+  let isCloudinaryConfigured = $derived(
+    !!env.PUBLIC_CLOUDINARY_CLOUD_NAME && !!env.PUBLIC_CLOUDINARY_UPLOAD_PRESET,
+  );
 
-  function handleFileUpload(e: Event) {
+  function handleCloudinarySuccess(result: any) {
+    const url = result.info?.secure_url;
+    if (url) {
+      uploadedUrl = url;
+      onUpload(url);
+    }
+  }
+
+  function handleLocalUpload(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -22,31 +36,93 @@
 
 <div class="uploader">
   {#if !uploadedUrl}
-    <div class="upload-zone">
-      <div class="upload-icon">
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-        >
-          <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-          <path d="M12 12v9" />
-          <path d="m16 16-4-4-4 4" />
-        </svg>
+    {#if isCloudinaryConfigured}
+      <CldUploadWidget
+        uploadPreset={env.PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+        options={{
+          cloudName: env.PUBLIC_CLOUDINARY_CLOUD_NAME,
+          sources: ["local", "camera"],
+          multiple: false,
+          maxFiles: 1,
+          cropping: true,
+          croppingAspectRatio: 1,
+          croppingShowDimensions: true,
+          resourceType: "image",
+          maxImageFileSize: 10000000,
+          styles: {
+            palette: {
+              window: "#ffffff",
+              sourceBg: "#f4f4f5",
+              windowBorder: "#81EDFF",
+              tabIcon: "#81EDFF",
+              inactiveTabIcon: "#666666",
+              menuIcons: "#222222",
+              link: "#81EDFF",
+              action: "#81EDFF",
+              inProgress: "#81EDFF",
+              complete: "#28a745",
+              error: "#dc3545",
+              textDark: "#222222",
+              textLight: "#666666",
+            },
+          },
+        }}
+        onSuccess={handleCloudinarySuccess}
+      >
+        {#snippet children({ open }: { open: any })}
+          <button class="upload-zone" onclick={open}>
+            <div class="upload-icon">
+              <svg
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"
+                />
+                <path d="M12 12v9" />
+                <path d="m16 16-4-4-4 4" />
+              </svg>
+            </div>
+            <h3>Upload Your Photo</h3>
+            <p>Click to upload your photo</p>
+            <span class="upload-hint">Supports JPG, PNG, WebP • Max 10MB</span>
+          </button>
+        {/snippet}
+      </CldUploadWidget>
+    {:else}
+      <!-- Fallback to local upload when Cloudinary not configured -->
+      <div class="upload-zone">
+        <div class="upload-icon">
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path
+              d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"
+            />
+            <path d="M12 12v9" />
+            <path d="m16 16-4-4-4 4" />
+          </svg>
+        </div>
+        <h3>Upload Your Photo</h3>
+        <p>Click or drag & drop your image here</p>
+        <span class="upload-hint">Supports JPG, PNG, WebP • Max 10MB</span>
+        <input
+          type="file"
+          accept="image/*"
+          onchange={handleLocalUpload}
+          class="file-input"
+        />
       </div>
-      <h3>Upload Your Photo</h3>
-      <p>Click or drag & drop your image here</p>
-      <span class="upload-hint">Supports JPG, PNG, WebP • Max 10MB</span>
-      <input
-        type="file"
-        accept="image/*"
-        onchange={handleFileUpload}
-        class="file-input"
-      />
-    </div>
+    {/if}
   {:else}
     <div class="preview-container">
       <img src={uploadedUrl} alt="Uploaded preview" class="preview-image" />

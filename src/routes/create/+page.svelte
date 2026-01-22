@@ -14,13 +14,10 @@
     let selectedGender = $state<"male" | "female" | null>(null);
     let selectedRole = $state<Role | null>(null);
     let currentStep = $state(1);
-
-    // Computed - get the avatar image path based on gender and role
-    let avatarImagePath = $derived(() => {
-        if (!selectedGender || !selectedRole) return null;
-        const genderPrefix = selectedGender === "male" ? "m" : "f";
-        return `/${genderPrefix}-${selectedRole.id}.png`;
-    });
+    let isGenerating = $state(false);
+    let generatedAvatarUrl = $state<string | null>(null);
+    let cloudinaryUrl = $state<string | null>(null);
+    let error = $state<string | null>(null);
 
     function handleImageUpload(url: string) {
         uploadedImageUrl = url;
@@ -33,15 +30,51 @@
 
     function handleRoleSelect(role: Role) {
         selectedRole = role;
-        currentStep = 3; // Auto-advance to result
+        currentStep = 3; // Auto-advance to generate step
+    }
+
+    async function generateAvatar() {
+        if (!uploadedImageUrl || !selectedGender || !selectedRole) return;
+
+        isGenerating = true;
+        error = null;
+        generatedAvatarUrl = null;
+
+        try {
+            const response = await fetch("/api/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userImageUrl: uploadedImageUrl,
+                    gender: selectedGender,
+                    role: selectedRole.id,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to generate avatar");
+            }
+
+            generatedAvatarUrl = data.avatarUrl;
+            cloudinaryUrl = data.cloudinaryUrl;
+        } catch (err) {
+            error =
+                err instanceof Error
+                    ? err.message
+                    : "An unexpected error occurred";
+        } finally {
+            isGenerating = false;
+        }
     }
 
     function downloadAvatar() {
-        const imagePath = avatarImagePath();
-        if (!imagePath) return;
+        const imageUrl = generatedAvatarUrl || cloudinaryUrl;
+        if (!imageUrl) return;
 
         const link = document.createElement("a");
-        link.href = imagePath;
+        link.href = imageUrl;
         link.download = `avatar-${selectedRole?.id || "custom"}-${Date.now()}.png`;
         link.target = "_blank";
         document.body.appendChild(link);
@@ -53,11 +86,13 @@
         uploadedImageUrl = null;
         selectedGender = null;
         selectedRole = null;
+        generatedAvatarUrl = null;
+        cloudinaryUrl = null;
+        error = null;
         currentStep = 1;
     }
 
     function goToStep(step: number) {
-        // Prevent skipping ahead without data
         if (step === 2 && !uploadedImageUrl) return;
         if (
             step === 3 &&
@@ -72,7 +107,7 @@
     <title>Create Avatar | Avatar Creator</title>
     <meta
         name="description"
-        content="Upload your photo and select your role to get your personalized avatar."
+        content="Upload your photo and select your role to get your personalized AI avatar."
     />
 </svelte:head>
 
@@ -101,7 +136,8 @@
                 Create Your <span class="impact-gradient-text">Avatar</span>
             </h1>
             <p class="impact-subtitle">
-                Upload your photo and select your role
+                Upload your photo and select your role for an AI-generated
+                avatar
             </p>
         </div>
     </header>
@@ -143,7 +179,7 @@
             onclick={() => goToStep(3)}
         >
             <span class="step-num">3</span>
-            <span class="step-label">Result</span>
+            <span class="step-label">Generate</span>
         </div>
     </div>
 
@@ -185,8 +221,7 @@
                             Select Gender & Role
                         </h2>
                         <p class="step-desc">
-                            Choose your gender and role to get your personalized
-                            avatar
+                            Choose your gender and role for your AI avatar
                         </p>
                     </div>
 
@@ -212,60 +247,162 @@
                         >
                             ← Back
                         </button>
-                        <h2 class="impact-section-header-text">Your Avatar</h2>
+                        <h2 class="impact-section-header-text">
+                            {generatedAvatarUrl
+                                ? "Your Avatar"
+                                : "Generate Avatar"}
+                        </h2>
                         <p class="step-desc">
-                            Here's your personalized {selectedRole?.name} avatar!
+                            {generatedAvatarUrl
+                                ? `Your personalized ${selectedRole?.name} avatar is ready!`
+                                : "Ready to create your AI-powered avatar"}
                         </p>
                     </div>
 
                     <div class="step-content">
-                        <div class="result-container">
-                            <div class="avatar-display">
-                                <img
-                                    src={avatarImagePath()}
-                                    alt="{selectedRole?.name} Avatar"
-                                    class="avatar-image"
-                                />
-                            </div>
-                            <div class="role-info">
-                                <span
-                                    class="role-badge impact-badge impact-badge--accent"
-                                >
-                                    {selectedRole?.name}
-                                </span>
-                                <p class="role-description">
-                                    {selectedRole?.description}
-                                </p>
-                            </div>
-                            <div class="action-buttons">
-                                <button
-                                    class="impact-btn impact-btn--lg"
-                                    onclick={downloadAvatar}
-                                >
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
+                        {#if !generatedAvatarUrl && !isGenerating && !error}
+                            <!-- Generate prompt -->
+                            <div class="generate-prompt">
+                                <div class="confirmation-card">
+                                    <div class="preview-summary">
+                                        <div class="preview-item">
+                                            <img
+                                                src={uploadedImageUrl}
+                                                alt="Your photo"
+                                                class="source-thumb"
+                                            />
+                                            <span class="preview-label"
+                                                >Your Photo</span
+                                            >
+                                        </div>
+                                        <div class="arrow">+</div>
+                                        <div class="preview-item">
+                                            <img
+                                                src={`/${selectedGender === "male" ? "m" : "f"}-${selectedRole?.id}.png`}
+                                                alt="Role reference"
+                                                class="source-thumb"
+                                            />
+                                            <span class="preview-label"
+                                                >{selectedRole?.name}</span
+                                            >
+                                        </div>
+                                        <div class="arrow">=</div>
+                                        <div
+                                            class="preview-item result-placeholder"
+                                        >
+                                            <span class="result-icon">✨</span>
+                                            <span class="preview-label"
+                                                >AI Avatar</span
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        class="impact-btn impact-btn--lg"
+                                        onclick={generateAvatar}
                                     >
-                                        <path
-                                            d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"
-                                        />
-                                        <polyline points="7,10 12,15 17,10" />
-                                        <line x1="12" y1="15" x2="12" y2="3" />
-                                    </svg>
-                                    Download Avatar
-                                </button>
+                                        <svg
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                        >
+                                            <path
+                                                d="M12 2L2 7l10 5 10-5-10-5z"
+                                            />
+                                            <path d="M2 17l10 5 10-5" />
+                                            <path d="M2 12l10 5 10-5" />
+                                        </svg>
+                                        Generate AI Avatar
+                                    </button>
+                                </div>
+                            </div>
+                        {:else if isGenerating}
+                            <!-- Loading state -->
+                            <div class="loading-container">
+                                <div class="loading-spinner"></div>
+                                <h3>Creating your AI avatar...</h3>
+                                <p>This may take 30-60 seconds</p>
+                            </div>
+                        {:else if error}
+                            <!-- Error state -->
+                            <div class="error-container">
+                                <div class="error-icon">⚠️</div>
+                                <h3>Generation Failed</h3>
+                                <p>{error}</p>
                                 <button
                                     class="impact-btn impact-btn--secondary"
-                                    onclick={reset}
+                                    onclick={() => {
+                                        error = null;
+                                    }}
                                 >
-                                    Start Over
+                                    Try Again
                                 </button>
                             </div>
-                        </div>
+                        {:else if generatedAvatarUrl}
+                            <!-- Result -->
+                            <div class="result-container">
+                                <div class="avatar-display">
+                                    <img
+                                        src={generatedAvatarUrl}
+                                        alt="{selectedRole?.name} Avatar"
+                                        class="avatar-image"
+                                    />
+                                </div>
+                                <div class="role-info">
+                                    <span
+                                        class="role-badge impact-badge impact-badge--accent"
+                                    >
+                                        {selectedRole?.name}
+                                    </span>
+                                    <p class="role-description">
+                                        {selectedRole?.description}
+                                    </p>
+                                    {#if cloudinaryUrl}
+                                        <p class="saved-notice">
+                                            ✓ Saved to cloud
+                                        </p>
+                                    {/if}
+                                </div>
+                                <div class="action-buttons">
+                                    <button
+                                        class="impact-btn impact-btn--lg"
+                                        onclick={downloadAvatar}
+                                    >
+                                        <svg
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                        >
+                                            <path
+                                                d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"
+                                            />
+                                            <polyline
+                                                points="7,10 12,15 17,10"
+                                            />
+                                            <line
+                                                x1="12"
+                                                y1="15"
+                                                x2="12"
+                                                y2="3"
+                                            />
+                                        </svg>
+                                        Download Avatar
+                                    </button>
+                                    <button
+                                        class="impact-btn impact-btn--secondary"
+                                        onclick={reset}
+                                    >
+                                        Start Over
+                                    </button>
+                                </div>
+                            </div>
+                        {/if}
                     </div>
                 </div>
             {/if}
@@ -422,6 +559,119 @@
         text-decoration: underline;
     }
 
+    /* Preview Summary */
+    .confirmation-card {
+        text-align: center;
+    }
+
+    .preview-summary {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--impact-space-lg);
+        margin-bottom: var(--impact-space-2xl);
+        flex-wrap: wrap;
+    }
+
+    .preview-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--impact-space-sm);
+    }
+
+    .source-thumb {
+        width: 100px;
+        height: 100px;
+        border-radius: var(--impact-radius-lg);
+        object-fit: cover;
+        border: 3px solid var(--impact-accent);
+        box-shadow: var(--impact-shadow-md);
+    }
+
+    .preview-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--impact-text-secondary);
+    }
+
+    .arrow {
+        font-size: 1.5rem;
+        color: var(--impact-text-secondary);
+        font-weight: bold;
+    }
+
+    .result-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: var(--impact-radius-lg);
+        background: linear-gradient(
+            135deg,
+            var(--impact-accent-light),
+            var(--impact-accent)
+        );
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 3px dashed var(--impact-accent);
+    }
+
+    .result-icon {
+        font-size: 2rem;
+    }
+
+    /* Loading State */
+    .loading-container {
+        text-align: center;
+        padding: var(--impact-space-2xl);
+    }
+
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid var(--impact-border);
+        border-top-color: var(--impact-accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto var(--impact-space-lg);
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-container h3 {
+        margin-bottom: var(--impact-space-sm);
+    }
+
+    .loading-container p {
+        color: var(--impact-text-secondary);
+    }
+
+    /* Error State */
+    .error-container {
+        text-align: center;
+        padding: var(--impact-space-2xl);
+    }
+
+    .error-icon {
+        font-size: 3rem;
+        margin-bottom: var(--impact-space-md);
+    }
+
+    .error-container h3 {
+        color: var(--impact-error, #dc3545);
+        margin-bottom: var(--impact-space-sm);
+    }
+
+    .error-container p {
+        color: var(--impact-text-secondary);
+        margin-bottom: var(--impact-space-lg);
+    }
+
     /* Result Container */
     .result-container {
         text-align: center;
@@ -455,6 +705,12 @@
         font-size: 1rem;
     }
 
+    .saved-notice {
+        margin-top: var(--impact-space-sm);
+        color: var(--impact-success, #28a745);
+        font-size: 0.9rem;
+    }
+
     .action-buttons {
         display: flex;
         gap: var(--impact-space-md);
@@ -473,6 +729,16 @@
 
         .wizard-container {
             padding: var(--impact-space-lg);
+        }
+
+        .preview-summary {
+            gap: var(--impact-space-sm);
+        }
+
+        .source-thumb,
+        .result-placeholder {
+            width: 70px;
+            height: 70px;
         }
 
         .avatar-image {
