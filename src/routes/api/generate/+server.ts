@@ -36,7 +36,7 @@ export const POST: RequestHandler = async ({ request }) => {
         // Initialize Gemini
         const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({
-            model: 'gemini-1.5-pro',
+            model: 'gemini-1.5-pro-latest',
             generationConfig: {
                 // @ts-ignore - responseModalities is valid for image generation
                 responseModalities: ['Text', 'Image']
