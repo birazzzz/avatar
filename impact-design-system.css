@@ -1,0 +1,1304 @@
+/**
+ * ============================================
+ * IMPACT DESIGN SYSTEM
+ * ============================================
+ * A modern, premium CSS framework featuring:
+ * - Glassmorphism effects
+ * - Aurora animated backgrounds
+ * - Floating orbs & particles
+ * - Smooth animations & micro-interactions
+ * - Responsive design utilities
+ * 
+ * Usage: Include this CSS file in your project
+ * and add the corresponding HTML structure.
+ * ============================================
+ */
+
+/* ============================================
+   CSS VARIABLES (DESIGN TOKENS)
+   ============================================ */
+:root {
+    /* Core Colors */
+    --impact-bg: #edeae7;
+    --impact-card: #ffffff;
+    --impact-border: #dedede;
+    --impact-hover: #81EDFF;
+    --impact-text: #222222;
+    --impact-text-secondary: #666666;
+
+    /* Accent Colors */
+    --impact-accent: #81EDFF;
+    --impact-accent-dark: #5bc4d4;
+    --impact-accent-glow: rgba(129, 237, 255, 0.5);
+    --impact-accent-light: rgba(129, 237, 255, 0.15);
+
+    /* Medal Colors (for rankings/achievements) */
+    --impact-gold: #FFD700;
+    --impact-gold-glow: rgba(255, 215, 0, 0.4);
+    --impact-silver: #C0C0C0;
+    --impact-silver-glow: rgba(192, 192, 192, 0.4);
+    --impact-bronze: #CD7F32;
+    --impact-bronze-glow: rgba(205, 127, 50, 0.4);
+
+    /* Status Colors */
+    --impact-success: #28a745;
+    --impact-success-bg: rgba(40, 167, 69, 0.15);
+    --impact-error: #dc3545;
+    --impact-warning: #ffc107;
+
+    /* Spacing Scale */
+    --impact-space-xs: 4px;
+    --impact-space-sm: 8px;
+    --impact-space-md: 16px;
+    --impact-space-lg: 24px;
+    --impact-space-xl: 32px;
+    --impact-space-2xl: 48px;
+
+    /* Border Radius */
+    --impact-radius-sm: 10px;
+    --impact-radius-md: 16px;
+    --impact-radius-lg: 20px;
+    --impact-radius-xl: 28px;
+    --impact-radius-2xl: 32px;
+    --impact-radius-full: 50px;
+
+    /* Shadows */
+    --impact-shadow-sm: 0 4px 20px rgba(0, 0, 0, 0.05);
+    --impact-shadow-md: 0 10px 40px rgba(0, 0, 0, 0.1);
+    --impact-shadow-lg: 0 25px 80px rgba(0, 0, 0, 0.12);
+    --impact-shadow-glow: 0 10px 40px var(--impact-accent-glow);
+
+    /* Typography */
+    --impact-font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --impact-font-size-xs: 0.8rem;
+    --impact-font-size-sm: 0.85rem;
+    --impact-font-size-base: 1rem;
+    --impact-font-size-md: 1.1rem;
+    --impact-font-size-lg: 1.2rem;
+    --impact-font-size-xl: 1.6rem;
+    --impact-font-size-2xl: 2rem;
+    --impact-font-size-3xl: 2.4rem;
+
+    /* Transitions */
+    --impact-transition-fast: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    --impact-transition-base: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --impact-transition-slow: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    --impact-transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+.impact-reset * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.impact-body {
+    font-family: var(--impact-font-family);
+    background: var(--impact-bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* ============================================
+   ANIMATED BACKGROUNDS
+   ============================================ */
+
+/* Aurora Background Effect */
+.impact-aurora {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.impact-aurora::before,
+.impact-aurora::after {
+    content: '';
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    background: radial-gradient(ellipse at center, var(--impact-accent-light) 0%, transparent 70%);
+    animation: impactAurora1 12s ease-in-out infinite;
+}
+
+.impact-aurora::before {
+    top: -50%;
+    left: -25%;
+    animation-delay: 0s;
+}
+
+.impact-aurora::after {
+    bottom: -50%;
+    right: -25%;
+    animation: impactAurora2 15s ease-in-out infinite;
+    animation-delay: -5s;
+}
+
+@keyframes impactAurora1 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+        opacity: 0.6;
+    }
+
+    33% {
+        transform: translate(5%, 5%) rotate(5deg) scale(1.1);
+        opacity: 0.8;
+    }
+
+    66% {
+        transform: translate(-3%, 3%) rotate(-3deg) scale(0.95);
+        opacity: 0.5;
+    }
+}
+
+@keyframes impactAurora2 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translate(-5%, -5%) rotate(-5deg) scale(1.15);
+        opacity: 0.7;
+    }
+}
+
+/* Floating Orbs */
+.impact-orbs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.impact-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    animation: impactOrbFloat 20s ease-in-out infinite;
+}
+
+.impact-orb:nth-child(1) {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(129, 237, 255, 0.25), transparent 70%);
+    top: -10%;
+    right: -10%;
+    animation-delay: 0s;
+}
+
+.impact-orb:nth-child(2) {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(129, 237, 255, 0.2), transparent 70%);
+    bottom: -5%;
+    left: -5%;
+    animation-delay: -7s;
+}
+
+.impact-orb:nth-child(3) {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(129, 237, 255, 0.3), transparent 70%);
+    top: 50%;
+    left: 20%;
+    animation-delay: -14s;
+}
+
+/* Gold orb variant */
+.impact-orb--gold {
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.15), transparent 70%) !important;
+}
+
+@keyframes impactOrbFloat {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    25% {
+        transform: translate(30px, -30px) scale(1.1);
+    }
+
+    50% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+
+    75% {
+        transform: translate(20px, 10px) scale(1.05);
+    }
+}
+
+/* Particles */
+.impact-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.impact-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--impact-accent);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: impactParticleFloat 15s infinite;
+}
+
+.impact-particle:nth-child(1) {
+    left: 10%;
+    animation-delay: 0s;
+    animation-duration: 20s;
+}
+
+.impact-particle:nth-child(2) {
+    left: 20%;
+    animation-delay: -2s;
+    animation-duration: 18s;
+}
+
+.impact-particle:nth-child(3) {
+    left: 30%;
+    animation-delay: -4s;
+    animation-duration: 22s;
+}
+
+.impact-particle:nth-child(4) {
+    left: 40%;
+    animation-delay: -6s;
+    animation-duration: 16s;
+}
+
+.impact-particle:nth-child(5) {
+    left: 50%;
+    animation-delay: -8s;
+    animation-duration: 24s;
+}
+
+.impact-particle:nth-child(6) {
+    left: 60%;
+    animation-delay: -10s;
+    animation-duration: 19s;
+}
+
+.impact-particle:nth-child(7) {
+    left: 70%;
+    animation-delay: -12s;
+    animation-duration: 21s;
+}
+
+.impact-particle:nth-child(8) {
+    left: 80%;
+    animation-delay: -14s;
+    animation-duration: 17s;
+}
+
+.impact-particle:nth-child(9) {
+    left: 90%;
+    animation-delay: -16s;
+    animation-duration: 23s;
+}
+
+@keyframes impactParticleFloat {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.3;
+    }
+
+    90% {
+        opacity: 0.3;
+    }
+
+    100% {
+        transform: translateY(-100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   CONTAINERS & CARDS
+   ============================================ */
+
+/* Glassmorphism Container */
+.impact-container {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-radius: var(--impact-radius-2xl);
+    box-shadow:
+        var(--impact-shadow-lg),
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    padding: var(--impact-space-2xl) 40px 40px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    animation: impactContainerFloat 6s ease-in-out infinite, impactContainerEnter 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+}
+
+/* Wide container variant */
+.impact-container--wide {
+    max-width: 950px;
+    text-align: left;
+}
+
+/* Extra wide container */
+.impact-container--full {
+    max-width: 1200px;
+}
+
+/* No float animation */
+.impact-container--static {
+    animation: impactContainerEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes impactContainerEnter {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes impactContainerFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+/* Animated Border Effect */
+.impact-container--bordered::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 34px;
+    background: linear-gradient(135deg, var(--impact-accent), transparent 40%, transparent 60%, var(--impact-accent));
+    z-index: -1;
+    opacity: 0.5;
+    animation: impactBorderRotate 8s linear infinite;
+}
+
+@keyframes impactBorderRotate {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+
+    100% {
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* Card Component */
+.impact-card {
+    border: 2px solid transparent;
+    border-radius: var(--impact-radius-lg);
+    padding: var(--impact-space-lg);
+    cursor: pointer;
+    transition: all var(--impact-transition-base);
+    background: rgba(255, 255, 255, 0.9);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--impact-shadow-sm);
+    animation: impactCardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes impactCardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+}
+
+.impact-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--impact-accent-light), transparent 60%);
+    opacity: 0;
+    transition: 0.4s;
+}
+
+.impact-card:hover {
+    border-color: var(--impact-accent);
+}
+
+.impact-card:hover::before {
+    opacity: 1;
+}
+
+/* Selected Card State */
+.impact-card--selected {
+    border-color: var(--impact-accent);
+    background: linear-gradient(135deg, var(--impact-accent-light), rgba(255, 255, 255, 1));
+    box-shadow:
+        0 15px 50px var(--impact-accent-glow),
+        0 0 0 2px var(--impact-accent);
+}
+
+.impact-card--selected::after {
+    content: '✓';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: linear-gradient(135deg, var(--impact-accent), var(--impact-accent-dark));
+    color: var(--impact-text);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 800;
+    animation: impactCheckPop var(--impact-transition-bounce);
+    box-shadow: 0 4px 15px var(--impact-accent-glow);
+}
+
+@keyframes impactCheckPop {
+    0% {
+        transform: scale(0) rotate(-180deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0);
+    }
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+.impact-title {
+    color: var(--impact-text);
+    font-weight: 800;
+    font-size: var(--impact-font-size-2xl);
+    margin-bottom: 12px;
+    line-height: 1.1;
+    animation: impactFadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+    opacity: 0;
+    transform: translateY(30px);
+    letter-spacing: -0.5px;
+}
+
+.impact-title--large {
+    font-size: var(--impact-font-size-3xl);
+}
+
+/* Gradient Text */
+.impact-title span,
+.impact-gradient-text {
+    background: linear-gradient(135deg, var(--impact-text), var(--impact-accent-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.impact-subtitle {
+    color: var(--impact-text-secondary);
+    font-size: var(--impact-font-size-base);
+    margin-bottom: var(--impact-space-xl);
+    line-height: 1.6;
+    animation: impactFadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.impact-section-header {
+    text-align: center;
+    margin-bottom: var(--impact-space-lg);
+    color: var(--impact-text);
+    font-weight: 700;
+    font-size: var(--impact-font-size-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--impact-space-md);
+}
+
+.impact-section-header::before,
+.impact-section-header::after {
+    content: '';
+    height: 2px;
+    width: 60px;
+    background: linear-gradient(90deg, transparent, var(--impact-accent));
+    border-radius: 2px;
+}
+
+.impact-section-header::after {
+    background: linear-gradient(90deg, var(--impact-accent), transparent);
+}
+
+@keyframes impactFadeSlideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.impact-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--impact-accent), var(--impact-accent-dark));
+    color: var(--impact-text);
+    border: none;
+    padding: 16px 40px;
+    font-size: var(--impact-font-size-md);
+    font-weight: 700;
+    border-radius: var(--impact-radius-full);
+    cursor: pointer;
+    transition: all var(--impact-transition-base);
+    font-family: var(--impact-font-family);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        var(--impact-shadow-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.impact-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: impactShimmer 3s infinite;
+}
+
+@keyframes impactShimmer {
+    0% {
+        left: -100%;
+    }
+
+    50%,
+    100% {
+        left: 100%;
+    }
+}
+
+.impact-btn:hover {
+    box-shadow:
+        0 5px 15px var(--impact-accent-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.impact-btn:active {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.impact-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Button Sizes */
+.impact-btn--sm {
+    padding: 12px 24px;
+    font-size: var(--impact-font-size-sm);
+}
+
+.impact-btn--lg {
+    padding: 18px 48px;
+    font-size: var(--impact-font-size-lg);
+}
+
+/* Button Variants */
+.impact-btn--secondary {
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--impact-text);
+    box-shadow: var(--impact-shadow-sm);
+}
+
+.impact-btn--secondary:hover {
+    background: var(--impact-card);
+    box-shadow: var(--impact-shadow-md);
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+.impact-form-group {
+    margin-bottom: var(--impact-space-lg);
+    text-align: left;
+}
+
+.impact-label {
+    display: block;
+    margin-bottom: var(--impact-space-sm);
+    font-weight: 600;
+    color: var(--impact-text);
+    font-size: var(--impact-font-size-sm);
+}
+
+.impact-input,
+.impact-select {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid transparent;
+    border-radius: var(--impact-radius-md);
+    font-family: var(--impact-font-family);
+    font-size: var(--impact-font-size-base);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    transition: all var(--impact-transition-base);
+}
+
+.impact-input:focus,
+.impact-select:focus {
+    outline: none;
+    border-color: var(--impact-accent);
+    background: var(--impact-card);
+    box-shadow:
+        0 8px 30px rgba(129, 237, 255, 0.2),
+        0 0 0 4px var(--impact-accent-light);
+    transform: translateY(-2px);
+}
+
+.impact-input::placeholder {
+    color: #aaa;
+}
+
+/* Search Input */
+.impact-search-container {
+    position: relative;
+}
+
+.impact-search-input {
+    padding-left: 52px !important;
+}
+
+.impact-search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--impact-font-size-md);
+    pointer-events: none;
+}
+
+/* ============================================
+   BADGES & CHIPS
+   ============================================ */
+
+.impact-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 6px 12px;
+    border-radius: var(--impact-radius-sm);
+    font-size: var(--impact-font-size-sm);
+    color: var(--impact-text-secondary);
+}
+
+.impact-badge--accent {
+    background: var(--impact-accent-light);
+    color: var(--impact-text);
+}
+
+.impact-badge--count {
+    background: linear-gradient(135deg, var(--impact-accent), var(--impact-accent-dark));
+    color: var(--impact-text);
+    padding: 6px 14px;
+    border-radius: var(--impact-radius-full);
+    font-weight: 800;
+    min-width: 36px;
+    box-shadow: 0 4px 15px var(--impact-accent-glow);
+}
+
+/* Live Indicator */
+.impact-live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--impact-success-bg);
+    color: var(--impact-success);
+    padding: 10px 20px;
+    border-radius: var(--impact-radius-full);
+    font-size: var(--impact-font-size-sm);
+    font-weight: 700;
+    border: 1px solid rgba(40, 167, 69, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.impact-live-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--impact-success);
+    border-radius: 50%;
+    animation: impactLivePulse 2s ease-in-out infinite;
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.6);
+}
+
+@keyframes impactLivePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.6);
+    }
+
+    50% {
+        transform: scale(1.3);
+        box-shadow: 0 0 25px rgba(40, 167, 69, 0.8);
+    }
+}
+
+/* ============================================
+   LIST ITEMS (Leaderboard Style)
+   ============================================ */
+
+.impact-list-item {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: var(--impact-radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 14px;
+    box-shadow: var(--impact-shadow-sm);
+    border: 2px solid transparent;
+    transition: all var(--impact-transition-base);
+    animation: impactItemEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes impactItemEnter {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+}
+
+.impact-list-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 5px;
+    background: var(--impact-accent);
+    transform: scaleY(0);
+    transition: 0.4s;
+}
+
+.impact-list-item:hover {
+    border-color: var(--impact-accent);
+    transform: translateX(10px) scale(1.01);
+    box-shadow:
+        0 15px 50px rgba(129, 237, 255, 0.2),
+        -5px 0 30px rgba(129, 237, 255, 0.15);
+}
+
+.impact-list-item:hover::before {
+    transform: scaleY(1);
+}
+
+/* Top 3 Medal Variants */
+.impact-list-item--gold {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 255, 255, 0.95));
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    box-shadow:
+        0 8px 40px var(--impact-gold-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.impact-list-item--gold::before {
+    background: linear-gradient(180deg, var(--impact-gold), #FFA500);
+    transform: scaleY(1);
+    width: 6px;
+}
+
+.impact-list-item--gold:hover {
+    box-shadow: 0 20px 60px var(--impact-gold-glow);
+    border-color: var(--impact-gold);
+}
+
+.impact-list-item--silver {
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.12), rgba(255, 255, 255, 0.95));
+    border: 2px solid rgba(192, 192, 192, 0.4);
+}
+
+.impact-list-item--silver::before {
+    background: linear-gradient(180deg, var(--impact-silver), #A0A0A0);
+    transform: scaleY(1);
+}
+
+.impact-list-item--bronze {
+    background: linear-gradient(135deg, rgba(205, 127, 50, 0.12), rgba(255, 255, 255, 0.95));
+    border: 2px solid rgba(205, 127, 50, 0.4);
+}
+
+.impact-list-item--bronze::before {
+    background: linear-gradient(180deg, var(--impact-bronze), #A5652C);
+    transform: scaleY(1);
+}
+
+/* Rank Badge */
+.impact-rank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-right: 20px;
+    flex-shrink: 0;
+    transition: 0.4s;
+}
+
+.impact-list-item:hover .impact-rank {
+    transform: scale(1.15) rotate(5deg);
+}
+
+.impact-rank--gold {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #6B4F00;
+    box-shadow: 0 6px 25px var(--impact-gold-glow);
+    animation: impactRankGlow 3s ease-in-out infinite;
+}
+
+.impact-rank--gold::before {
+    content: '👑';
+    position: absolute;
+    top: -16px;
+    font-size: 1.3rem;
+    animation: impactCrownFloat 2s ease-in-out infinite;
+    filter: drop-shadow(0 2px 5px rgba(255, 215, 0, 0.5));
+}
+
+.impact-rank--silver {
+    background: linear-gradient(135deg, #E8E8E8, #B8B8B8);
+    color: #3A3A3A;
+    box-shadow: 0 6px 20px var(--impact-silver-glow);
+}
+
+.impact-rank--bronze {
+    background: linear-gradient(135deg, #DDA06D, #B87333);
+    color: #4A3520;
+    box-shadow: 0 6px 20px var(--impact-bronze-glow);
+}
+
+.impact-rank--default {
+    background: linear-gradient(135deg, var(--impact-accent), var(--impact-accent-dark));
+    color: var(--impact-text);
+    box-shadow: 0 6px 20px var(--impact-accent-glow);
+}
+
+@keyframes impactRankGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 6px 25px var(--impact-gold-glow);
+    }
+
+    50% {
+        box-shadow: 0 8px 40px rgba(255, 215, 0, 0.6);
+    }
+}
+
+@keyframes impactCrownFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    50% {
+        transform: translateY(-5px) rotate(5deg);
+    }
+}
+
+/* ============================================
+   QR CODE / IMAGE BOX
+   ============================================ */
+
+.impact-qr-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.impact-qr-ring {
+    position: absolute;
+    inset: -15px;
+    border-radius: var(--impact-radius-xl);
+    border: 2px dashed var(--impact-accent);
+    opacity: 0.5;
+    animation: impactRingRotate 20s linear infinite;
+}
+
+@keyframes impactRingRotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.impact-qr-box {
+    width: 180px;
+    height: 180px;
+    background: var(--impact-card);
+    border: none;
+    border-radius: var(--impact-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        var(--impact-shadow-md),
+        0 0 0 1px rgba(129, 237, 255, 0.2);
+}
+
+.impact-qr-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, var(--impact-accent-light) 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: 0.6s;
+}
+
+.impact-qr-box:hover {
+    transform: translateY(-12px) scale(1.05) rotateX(5deg);
+    box-shadow:
+        0 30px 60px var(--impact-accent-glow),
+        0 0 0 2px var(--impact-accent),
+        0 0 60px rgba(129, 237, 255, 0.2);
+}
+
+.impact-qr-box:hover::before {
+    transform: translateX(100%);
+}
+
+.impact-qr-box img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    border-radius: var(--impact-radius-md);
+    transition: 0.5s;
+}
+
+.impact-qr-box:hover img {
+    transform: scale(1.05);
+}
+
+/* ============================================
+   LOGO / IMAGE WITH EFFECTS
+   ============================================ */
+
+.impact-logo {
+    max-width: 110px;
+    height: auto;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15));
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: impactLogoPulse 3s ease-in-out infinite;
+}
+
+@keyframes impactLogoPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15));
+    }
+
+    50% {
+        transform: scale(1.03);
+        filter: drop-shadow(0 15px 40px var(--impact-accent-glow));
+    }
+}
+
+.impact-logo:hover {
+    transform: scale(1.1) rotate(5deg);
+    filter: drop-shadow(0 20px 50px rgba(129, 237, 255, 0.4));
+}
+
+/* ============================================
+   SPINNER / LOADING
+   ============================================ */
+
+.impact-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0, 0, 0, 0.2);
+    border-top-color: var(--impact-text);
+    border-radius: 50%;
+    animation: impactSpin 0.8s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes impactSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   SELECTION INFO BAR
+   ============================================ */
+
+.impact-selection-info {
+    background: linear-gradient(135deg, var(--impact-accent-light), rgba(129, 237, 255, 0.05));
+    border: 2px solid var(--impact-accent);
+    border-radius: var(--impact-radius-lg);
+    padding: var(--impact-space-md) var(--impact-space-lg);
+    margin-bottom: var(--impact-space-lg);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.impact-selection-info::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: impactSelectionShimmer 3s infinite;
+    transform: translateX(-100%);
+}
+
+@keyframes impactSelectionShimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    50%,
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* ============================================
+   GRID LAYOUTS
+   ============================================ */
+
+.impact-grid {
+    display: grid;
+    gap: var(--impact-space-md);
+}
+
+.impact-grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.impact-grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.impact-grid--auto {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+/* ============================================
+   RESPONSIVE UTILITIES
+   ============================================ */
+
+@media (max-width: 768px) {
+    .impact-container {
+        padding: 40px 28px 32px;
+        margin: 16px;
+        border-radius: var(--impact-radius-xl);
+    }
+
+    .impact-title {
+        font-size: 1.8rem;
+    }
+
+    .impact-grid--2,
+    .impact-grid--3 {
+        grid-template-columns: 1fr;
+    }
+
+    .impact-list-item {
+        padding: 16px 18px;
+    }
+
+    .impact-rank {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+        margin-right: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .impact-logo {
+        max-width: 90px;
+    }
+
+    .impact-title {
+        font-size: 1.5rem;
+    }
+
+    .impact-qr-box {
+        width: 140px;
+        height: 140px;
+    }
+
+    .impact-btn {
+        padding: 14px 32px;
+        font-size: 1rem;
+    }
+
+    .impact-orb:nth-child(3) {
+        display: none;
+    }
+
+    .impact-list-item {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--impact-space-md);
+    }
+
+    .impact-list-item:hover {
+        transform: translateY(-5px) scale(1.01);
+    }
+
+    .impact-rank {
+        margin-right: 0;
+    }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Text Alignment */
+.impact-text-center {
+    text-align: center;
+}
+
+.impact-text-left {
+    text-align: left;
+}
+
+.impact-text-right {
+    text-align: right;
+}
+
+/* Display */
+.impact-flex {
+    display: flex;
+}
+
+.impact-flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.impact-flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Spacing */
+.impact-mt-sm {
+    margin-top: var(--impact-space-sm);
+}
+
+.impact-mt-md {
+    margin-top: var(--impact-space-md);
+}
+
+.impact-mt-lg {
+    margin-top: var(--impact-space-lg);
+}
+
+.impact-mt-xl {
+    margin-top: var(--impact-space-xl);
+}
+
+.impact-mb-sm {
+    margin-bottom: var(--impact-space-sm);
+}
+
+.impact-mb-md {
+    margin-bottom: var(--impact-space-md);
+}
+
+.impact-mb-lg {
+    margin-bottom: var(--impact-space-lg);
+}
+
+.impact-mb-xl {
+    margin-bottom: var(--impact-space-xl);
+}
+
+/* Animation delays for staggered effects */
+.impact-delay-1 {
+    animation-delay: 0.1s;
+}
+
+.impact-delay-2 {
+    animation-delay: 0.2s;
+}
+
+.impact-delay-3 {
+    animation-delay: 0.3s;
+}
+
+.impact-delay-4 {
+    animation-delay: 0.4s;
+}
+
+.impact-delay-5 {
+    animation-delay: 0.5s;
+}
