@@ -8,7 +8,6 @@
 
   let { onUpload }: Props = $props();
   let uploadedUrl = $state<string | null>(null);
-  let fileInputElement: HTMLInputElement;
   let isCloudinaryConfigured = $derived(
     !!env.PUBLIC_CLOUDINARY_CLOUD_NAME && !!env.PUBLIC_CLOUDINARY_UPLOAD_PRESET,
   );
@@ -31,13 +30,6 @@
         onUpload(result);
       };
       reader.readAsDataURL(file);
-    }
-  }
-
-  function triggerFileInput() {
-    console.log("triggerFileInput called", fileInputElement);
-    if (fileInputElement) {
-      fileInputElement.click();
     }
   }
 </script>
@@ -102,16 +94,8 @@
         {/snippet}
       </CldUploadWidget>
     {:else}
-      <!-- Fallback to local upload when Cloudinary not configured -->
-      <input
-        type="file"
-        accept="image/*"
-        onchange={handleLocalUpload}
-        class="file-input-hidden"
-        bind:this={fileInputElement}
-        id="file-upload-input"
-      />
-      <button class="upload-zone" type="button" onclick={triggerFileInput}>
+      <!-- Simple label-based file upload - most reliable approach -->
+      <label for="file-upload" class="upload-zone">
         <div class="upload-icon">
           <svg
             width="48"
@@ -131,7 +115,14 @@
         <h3>Upload Your Photo</h3>
         <p>Click to upload your photo</p>
         <span class="upload-hint">Supports JPG, PNG, WebP • Max 10MB</span>
-      </button>
+        <input
+          type="file"
+          id="file-upload"
+          accept="image/*"
+          onchange={handleLocalUpload}
+          class="sr-only"
+        />
+      </label>
     {/if}
   {:else}
     <div class="preview-container">
@@ -165,7 +156,8 @@
     width: 100%;
   }
 
-  .file-input-hidden {
+  /* Screen reader only - hides the input visually but keeps it accessible */
+  .sr-only {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -174,10 +166,13 @@
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
-    border: 0;
+    border-width: 0;
   }
 
   .upload-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
     padding: var(--impact-space-2xl) var(--impact-space-xl);
     background: var(--impact-card);
@@ -188,9 +183,6 @@
     transition: all var(--impact-transition-base);
     font-family: inherit;
     color: inherit;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     box-sizing: border-box;
   }
 
