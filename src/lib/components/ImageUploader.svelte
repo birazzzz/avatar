@@ -8,6 +8,7 @@
 
   let { onUpload }: Props = $props();
   let uploadedUrl = $state<string | null>(null);
+  let fileInputRef = $state<HTMLInputElement | null>(null);
   let isCloudinaryConfigured = $derived(
     !!env.PUBLIC_CLOUDINARY_CLOUD_NAME && !!env.PUBLIC_CLOUDINARY_UPLOAD_PRESET,
   );
@@ -31,6 +32,10 @@
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  function triggerFileInput() {
+    fileInputRef?.click();
   }
 </script>
 
@@ -70,7 +75,7 @@
         onSuccess={handleCloudinarySuccess}
       >
         {#snippet children({ open }: { open: any })}
-          <button class="upload-zone" onclick={open}>
+          <button class="upload-zone" type="button" onclick={open}>
             <div class="upload-icon">
               <svg
                 width="48"
@@ -95,7 +100,15 @@
       </CldUploadWidget>
     {:else}
       <!-- Fallback to local upload when Cloudinary not configured -->
-      <div class="upload-zone">
+      <input
+        type="file"
+        accept="image/*"
+        onchange={handleLocalUpload}
+        class="file-input-hidden"
+        bind:this={fileInputRef}
+        id="file-upload-input"
+      />
+      <button class="upload-zone" type="button" onclick={triggerFileInput}>
         <div class="upload-icon">
           <svg
             width="48"
@@ -113,21 +126,16 @@
           </svg>
         </div>
         <h3>Upload Your Photo</h3>
-        <p>Click or drag & drop your image here</p>
+        <p>Click to upload your photo</p>
         <span class="upload-hint">Supports JPG, PNG, WebP • Max 10MB</span>
-        <input
-          type="file"
-          accept="image/*"
-          onchange={handleLocalUpload}
-          class="file-input"
-        />
-      </div>
+      </button>
     {/if}
   {:else}
     <div class="preview-container">
       <img src={uploadedUrl} alt="Uploaded preview" class="preview-image" />
       <button
         class="impact-btn impact-btn--secondary impact-btn--sm change-btn"
+        type="button"
         onclick={() => (uploadedUrl = null)}
       >
         <svg
@@ -154,6 +162,18 @@
     width: 100%;
   }
 
+  .file-input-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .upload-zone {
     width: 100%;
     padding: var(--impact-space-2xl) var(--impact-space-xl);
@@ -165,21 +185,19 @@
     transition: all var(--impact-transition-base);
     font-family: inherit;
     color: inherit;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     box-sizing: border-box;
   }
 
   .upload-zone:hover {
     border-color: var(--impact-accent);
+    background: rgba(129, 237, 255, 0.05);
   }
 
-  .file-input {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
+  .upload-zone:active {
+    transform: scale(0.99);
   }
 
   .upload-icon {
