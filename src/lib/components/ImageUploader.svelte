@@ -1,9 +1,6 @@
 <script lang="ts">
   import { CldUploadWidget } from "svelte-cloudinary";
-  import {
-    PUBLIC_CLOUDINARY_CLOUD_NAME,
-    PUBLIC_CLOUDINARY_UPLOAD_PRESET,
-  } from "$env/static/public";
+  import { env } from "$env/dynamic/public";
 
   interface Props {
     onUpload: (url: string) => void;
@@ -12,7 +9,7 @@
   let { onUpload }: Props = $props();
   let uploadedUrl = $state<string | null>(null);
   let isDevMode =
-    !PUBLIC_CLOUDINARY_CLOUD_NAME || !PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    !env.PUBLIC_CLOUDINARY_CLOUD_NAME || !env.PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
   function handleSuccess(result: any) {
     const url = result.info?.secure_url;
@@ -67,9 +64,9 @@
       </div>
     {:else}
       <CldUploadWidget
-        uploadPreset={PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+        uploadPreset={env.PUBLIC_CLOUDINARY_UPLOAD_PRESET}
         options={{
-          cloudName: PUBLIC_CLOUDINARY_CLOUD_NAME,
+          cloudName: env.PUBLIC_CLOUDINARY_CLOUD_NAME,
           sources: ["local", "camera"],
           multiple: false,
           maxFiles: 1,
