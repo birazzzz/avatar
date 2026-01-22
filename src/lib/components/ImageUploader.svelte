@@ -8,7 +8,7 @@
 
   let { onUpload }: Props = $props();
   let uploadedUrl = $state<string | null>(null);
-  let fileInputRef = $state<HTMLInputElement | null>(null);
+  let fileInputElement: HTMLInputElement;
   let isCloudinaryConfigured = $derived(
     !!env.PUBLIC_CLOUDINARY_CLOUD_NAME && !!env.PUBLIC_CLOUDINARY_UPLOAD_PRESET,
   );
@@ -35,7 +35,10 @@
   }
 
   function triggerFileInput() {
-    fileInputRef?.click();
+    console.log("triggerFileInput called", fileInputElement);
+    if (fileInputElement) {
+      fileInputElement.click();
+    }
   }
 </script>
 
@@ -105,7 +108,7 @@
         accept="image/*"
         onchange={handleLocalUpload}
         class="file-input-hidden"
-        bind:this={fileInputRef}
+        bind:this={fileInputElement}
         id="file-upload-input"
       />
       <button class="upload-zone" type="button" onclick={triggerFileInput}>
