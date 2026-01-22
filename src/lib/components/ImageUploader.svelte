@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { CldUploadWidget } from "svelte-cloudinary";
   import { env } from "$env/dynamic/public";
 
   interface Props {
@@ -8,94 +7,80 @@
 
   let { onUpload }: Props = $props();
   let uploadedUrl = $state<string | null>(null);
+  let isUploading = $state(false);
+  let uploadError = $state<string | null>(null);
+
   let isCloudinaryConfigured = $derived(
     !!env.PUBLIC_CLOUDINARY_CLOUD_NAME && !!env.PUBLIC_CLOUDINARY_UPLOAD_PRESET,
   );
 
-  function handleCloudinarySuccess(result: any) {
-    const url = result.info?.secure_url;
-    if (url) {
-      uploadedUrl = url;
-      onUpload(url);
-    }
-  }
-
-  function handleLocalUpload(e: Event) {
+  async function handleFileUpload(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        uploadedUrl = result;
-        onUpload(result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Reset error
+    uploadError = null;
+
+    // Local preview first
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      uploadedUrl = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+
+    // If Cloudinary is configured, upload it
+    if (isCloudinaryConfigured) {
+      try {
+        isUploading = true;
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", env.PUBLIC_CLOUDINARY_UPLOAD_PRESET);
+
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${env.PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || "Upload failed");
+        }
+
+        const data = await response.json();
+        const secureUrl = data.secure_url;
+
+        if (secureUrl) {
+          uploadedUrl = secureUrl; // Update to remote URL
+          onUpload(secureUrl);
+        }
+      } catch (err: any) {
+        console.error("Cloudinary upload error:", err);
+        uploadError = "Failed to upload image. Using local preview instead.";
+        // Fallback: still notify parent with local data URL if upload fails
+        if (uploadedUrl) onUpload(uploadedUrl);
+      } finally {
+        isUploading = false;
+      }
+    } else {
+      // Local fallback mode
+      if (uploadedUrl) onUpload(uploadedUrl);
     }
   }
 </script>
 
 <div class="uploader">
   {#if !uploadedUrl}
-    {#if isCloudinaryConfigured}
-      <CldUploadWidget
-        uploadPreset={env.PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-        options={{
-          sources: ["local", "camera"],
-          multiple: false,
-          maxFiles: 1,
-          cropping: true,
-          croppingAspectRatio: 1,
-          croppingShowDimensions: true,
-          resourceType: "image",
-          maxImageFileSize: 10000000,
-          styles: {
-            palette: {
-              window: "#ffffff",
-              sourceBg: "#f4f4f5",
-              windowBorder: "#81EDFF",
-              tabIcon: "#81EDFF",
-              inactiveTabIcon: "#666666",
-              menuIcons: "#222222",
-              link: "#81EDFF",
-              action: "#81EDFF",
-              inProgress: "#81EDFF",
-              complete: "#28a745",
-              error: "#dc3545",
-              textDark: "#222222",
-              textLight: "#666666",
-            },
-          },
-        }}
-        onSuccess={handleCloudinarySuccess}
-      >
-        {#snippet children({ open }: { open: any })}
-          <button class="upload-zone" type="button" onclick={open}>
-            <div class="upload-icon">
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"
-                />
-                <path d="M12 12v9" />
-                <path d="m16 16-4-4-4 4" />
-              </svg>
-            </div>
-            <h3>Upload Your Photo</h3>
-            <p>Click to upload your photo</p>
-            <span class="upload-hint">Supports JPG, PNG, WebP • Max 10MB</span>
-          </button>
-        {/snippet}
-      </CldUploadWidget>
-    {:else}
-      <!-- Simple label-based file upload - most reliable approach -->
-      <label for="file-upload" class="upload-zone">
-        <div class="upload-icon">
+    <label
+      for="file-upload"
+      class="upload-zone {isUploading ? 'uploading' : ''}"
+    >
+      <div class="upload-icon">
+        {#if isUploading}
+          <div class="spinner"></div>
+        {:else}
           <svg
             width="48"
             height="48"
@@ -110,26 +95,60 @@
             <path d="M12 12v9" />
             <path d="m16 16-4-4-4 4" />
           </svg>
+        {/if}
+      </div>
+      <h3>{isUploading ? "Uploading..." : "Upload Your Photo"}</h3>
+      <p>
+        {isUploading ? "Please wait a moment" : "Click to upload your photo"}
+      </p>
+      <span class="upload-hint">Supports JPG, PNG, WebP • Max 10MB</span>
+
+      {#if uploadError}
+        <div class="error-message">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          {uploadError}
         </div>
-        <h3>Upload Your Photo</h3>
-        <p>Click to upload your photo</p>
-        <span class="upload-hint">Supports JPG, PNG, WebP • Max 10MB</span>
-        <input
-          type="file"
-          id="file-upload"
-          accept="image/*"
-          onchange={handleLocalUpload}
-          class="sr-only"
-        />
-      </label>
-    {/if}
+      {/if}
+
+      <input
+        type="file"
+        id="file-upload"
+        accept="image/*"
+        onchange={handleFileUpload}
+        class="sr-only"
+        disabled={isUploading}
+      />
+    </label>
   {:else}
     <div class="preview-container">
-      <img src={uploadedUrl} alt="Uploaded preview" class="preview-image" />
+      <div class="image-wrapper">
+        <img src={uploadedUrl} alt="Uploaded preview" class="preview-image" />
+        {#if isUploading}
+          <div class="upload-overlay">
+            <div class="spinner"></div>
+          </div>
+        {/if}
+      </div>
+
       <button
         class="impact-btn impact-btn--secondary impact-btn--sm change-btn"
         type="button"
-        onclick={() => (uploadedUrl = null)}
+        onclick={() => {
+          uploadedUrl = null;
+          uploadError = null;
+        }}
+        disabled={isUploading}
       >
         <svg
           width="16"
@@ -155,7 +174,7 @@
     width: 100%;
   }
 
-  /* Screen reader only - hides the input visually but keeps it accessible */
+  /* Screen reader only */
   .sr-only {
     position: absolute;
     width: 1px;
@@ -183,15 +202,21 @@
     font-family: inherit;
     color: inherit;
     box-sizing: border-box;
+    position: relative;
   }
 
-  .upload-zone:hover {
+  .upload-zone:hover:not(.uploading) {
     border-color: var(--impact-accent);
     background: rgba(129, 237, 255, 0.05);
   }
 
-  .upload-zone:active {
+  .upload-zone:active:not(.uploading) {
     transform: scale(0.99);
+  }
+
+  .upload-zone.uploading {
+    cursor: wait;
+    opacity: 0.8;
   }
 
   .upload-icon {
@@ -231,6 +256,11 @@
     text-align: center;
   }
 
+  .image-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
   .preview-image {
     width: 100%;
     max-width: 300px;
@@ -243,5 +273,39 @@
 
   .change-btn {
     margin-top: var(--impact-space-md);
+  }
+
+  .spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(129, 237, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--impact-accent-dark);
+    animation: spin 1s ease-in-out infinite;
+  }
+
+  .upload-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--impact-radius-xl);
+  }
+
+  .error-message {
+    color: #dc3545;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 </style>
