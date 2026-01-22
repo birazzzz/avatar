@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GEMINI_API_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -11,7 +11,7 @@ export const POST: RequestHandler = async ({ request }) => {
             return json({ error: 'Missing required fields: imageUrl, style, or prompt' }, { status: 400 });
         }
 
-        if (!GEMINI_API_KEY) {
+        if (!env.GEMINI_API_KEY) {
             // Mock response for development flow
             await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate delay
             return json({
@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ request }) => {
         }
 
         // Initialize Gemini
-        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+        const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
         // Use gemini-2.0-flash-exp for image generation
         const model = genAI.getGenerativeModel({
