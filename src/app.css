@@ -455,6 +455,8 @@
     background: linear-gradient(135deg, var(--impact-accent-light), transparent 60%);
     opacity: 0;
     transition: 0.4s;
+    pointer-events: none;
+    /* Allow clicks to pass through to interactive elements */
 }
 
 .impact-card:hover {
