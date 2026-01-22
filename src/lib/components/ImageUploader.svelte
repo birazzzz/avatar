@@ -40,7 +40,6 @@
       <CldUploadWidget
         uploadPreset={env.PUBLIC_CLOUDINARY_UPLOAD_PRESET}
         options={{
-          cloudName: env.PUBLIC_CLOUDINARY_CLOUD_NAME,
           sources: ["local", "camera"],
           multiple: false,
           maxFiles: 1,
